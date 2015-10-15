@@ -1,6 +1,7 @@
 import json
 import logging
- 
+import traceback
+
 from beaker.container import NamespaceManager, Container
 from beaker.synchronization import file_synchronizer
 from beaker.util import verify_directory
@@ -63,10 +64,10 @@ class NoSqlManager(NamespaceManager):
         else:
             try:
                 return pickle.loads(self.db_conn.get(self._format_key(key)))
-            except:
-                log.error({
+            except Exception, e:
+                log.exception({
                     'name': 'beaker_extensions.nosql',
-                    'description': 'web-sessions redis has gone away'
+                    'description': traceback.format_exc()
                 })
 
     def __contains__(self, key):
@@ -84,10 +85,10 @@ class NoSqlManager(NamespaceManager):
     def __setitem__(self, key, value):
         try:
             self.set_value(key, value, self._expiretime)
-        except:
-            log.error({
+        except Exception, e:
+            log.exception({
                 'name': 'beaker_extensions.nosql',
-                'description': 'web-sessions redis has gone away'
+                'description': traceback.format_exc()
             })
     def __delitem__(self, key):
         del self.db_conn[self._format_key(key)]
