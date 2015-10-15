@@ -61,7 +61,13 @@ class NoSqlManager(NamespaceManager):
             else:
                 return json.loads(payload)
         else:
-            return pickle.loads(self.db_conn.get(self._format_key(key)))
+            try:
+                return pickle.loads(self.db_conn.get(self._format_key(key)))
+            except:
+                log.error({
+                    'name': 'beaker_extensions.nosql',
+                    'description': 'web-sessions redis has gone away'
+                })
 
     def __contains__(self, key):
         return self.db_conn.has_key(self._format_key(key))
@@ -76,8 +82,13 @@ class NoSqlManager(NamespaceManager):
             self.db_conn[self._format_key(key)] =  pickle.dumps(value, 2)
 
     def __setitem__(self, key, value):
-        self.set_value(key, value, self._expiretime)
-
+        try:
+            self.set_value(key, value, self._expiretime)
+        except:
+            log.error({
+                'name': 'beaker_extensions.nosql',
+                'description': 'web-sessions redis has gone away'
+            })
     def __delitem__(self, key):
         del self.db_conn[self._format_key(key)]
 
