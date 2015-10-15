@@ -55,15 +55,18 @@ class NoSqlManager(NamespaceManager):
         return self.namespace + '_' 
 
     def __getitem__(self, key):
+        # make sure we don't try to pickle.loads(None)
+        payload = self.db_conn.get(self._format_key(key))
+        if not payload:
+            return {}
         if self.serializer == 'json':
-            payload = self.db_conn.get(self._format_key(key))
             if isinstance(payload, bytes):
                 return json.loads(payload.decode('utf-8'))
             else:
                 return json.loads(payload)
         else:
             try:
-                return pickle.loads(self.db_conn.get(self._format_key(key)))
+                return pickle.loads(payload)
             except Exception, e:
                 log.exception({
                     'name': 'beaker_extensions.nosql',
