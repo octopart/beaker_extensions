@@ -6,6 +6,7 @@ from beaker.container import NamespaceManager, Container
 from beaker.synchronization import file_synchronizer
 from beaker.util import verify_directory
 from beaker.exceptions import MissingCacheParameter
+from datadog import statsd
 
 try:
     import cPickle as pickle
@@ -58,11 +59,13 @@ class NoSqlManager(NamespaceManager):
         # make sure we don't try to pickle.loads(None)
         try:
             payload = self.db_conn.get(self._format_key(key))
+            statsd.increment('session.set.success')
         except Exception, e:
             log.exception({
                 'name': 'beaker_extensions.nosql',
                 'description': traceback.format_exc()
             })
+            statsd.increment('session.get.redis_exception')
             return {}
         if not payload:
             return {}
@@ -95,11 +98,13 @@ class NoSqlManager(NamespaceManager):
     def __setitem__(self, key, value):
         try:
             self.set_value(key, value, self._expiretime)
+            statsd.increment('session.set.success')
         except Exception, e:
             log.exception({
                 'name': 'beaker_extensions.nosql',
                 'description': traceback.format_exc()
             })
+            statsd.increment('session.set.redis_exception')
     def __delitem__(self, key):
         del self.db_conn[self._format_key(key)]
 
