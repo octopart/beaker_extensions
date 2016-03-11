@@ -59,7 +59,7 @@ class NoSqlManager(NamespaceManager):
         # make sure we don't try to pickle.loads(None)
         try:
             payload = self.db_conn.get(self._format_key(key))
-            statsd.increment('session.set.success')
+            statsd.increment('session.get.success')
         except Exception, e:
             log.exception({
                 'name': 'beaker_extensions.nosql',
