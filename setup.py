@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = 'octopart10'
+version = '11octo'
 
 setup(name='beaker_extensions',
       version=version,
